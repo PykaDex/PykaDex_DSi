@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "quirc.h"
 
 #include <fat.h>
 #include <nds.h>
@@ -73,8 +74,8 @@ int main(int argc, char **argv) {
 
 		if(pressed & KEY_A) {
 			// Wait for previous transfer to finish
-				while(REG_NDMA1CNT & BIT(31))
-					swiWaitForVBlank();
+			while(REG_NDMA1CNT & BIT(31))
+				swiWaitForVBlank();
 
 			// Pause transfer
 			REG_CAM_CNT &= ~0x8000;
@@ -162,6 +163,49 @@ int main(int argc, char **argv) {
 				// Resume transfer
 				REG_CAM_CNT |= 0x8000;
 			}
+		} else if(pressed & KEY_Y) {
+			printf("Scanning for QR... ");
+
+			// Wait for previous transfer to finish
+			while(REG_NDMA1CNT & BIT(31))
+				swiWaitForVBlank();
+
+			// Get frame
+			u16 *buffer  = new u16[256 * 192];
+			REG_NDMA1DAD = (u32)buffer; // NDMA1DAD, dest RAM/VRAM
+			REG_NDMA1CNT = 0x8B044000;  // NDMA1CNT, start camera DMA
+			while(REG_NDMA1CNT & BIT(31))
+				swiWaitForVBlank();
+
+			// Pause transfer
+			REG_CAM_CNT &= ~0x8000;
+
+			quirc *q = quirc_new();
+			quirc_resize(q, 256, 192);
+			uint8_t *qrbuffer = quirc_begin(q, nullptr, nullptr);
+			// Convert to 1 byte grayscale
+			for(int i = 0; i < 256 * 192; i++) {
+				qrbuffer[i] = (((buffer[i] >> 10) & 0x1F) + ((buffer[i] & (0x1F << 5)) >> 5) + (buffer[i] & 0x1F)) / 3;
+			}
+			quirc_end(q);
+
+			if(quirc_count(q) > 0) {
+				struct quirc_code code;
+				struct quirc_data data;
+				quirc_extract(q, 0, &code);
+				if(!quirc_decode(&code, &data)) {
+					printf("\n%s\n", data.payload);
+				}
+			}
+
+			delete[] buffer;
+			printf("Done!\n");
+
+			// Set NDMA back to screen
+			REG_NDMA1DAD = (u32)bgGetGfxPtr(bg3Main); // NDMA1DAD, dest RAM/VRAM
+
+			// Resume transfer
+			REG_CAM_CNT |= 0x8000;
 		} else if(pressed & KEY_START) {
 			// Disable camera so the light turns off
 			fifoSendValue32(FIFO_USER_01, inner ? 2 : 4);
