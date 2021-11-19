@@ -1,14 +1,22 @@
 #include "camera.h"
-
 #include <fat.h>
 #include <nds.h>
 #include <stdio.h>
+#include <string>
 
 int main(int argc, char **argv) {
 	consoleDemoInit();
 	vramSetBankA(VRAM_A_MAIN_BG);
 	videoSetMode(MODE_5_2D);
 	int bg3Main = bgInit(3, BgType_Bmp16, BgSize_B16_256x256, 1, 0);
+
+	printf("+------------------------------+");
+	printf("|github.com/PykaDex/PykaDex_DSi|");
+	printf("|                              |");
+	printf("|        -------------         |");
+	printf("+-------( PykaDex DSi )--------+");
+	printf("         -------------         \n\n");
+	
 
 	bool fatInited = fatInitDefault();
 	if(!fatInited)
@@ -58,10 +66,14 @@ int main(int argc, char **argv) {
 	REG_NDMA1BCNT = 0x00000002;                // NDMA1BCNT, timing interval or so
 	REG_NDMA1CNT  = 0x8B044000;                // NDMA1CNT, start camera DMA
 
-	printf("\nA to swap, L/R to take picture\n");
+	printf("+------------------------------+");
+	printf("| (L] or [R) : capture         |");
+	printf("| (A)        : swap camera     |");
+	printf("+------------------------------+\n\n");
 
 	bool inner  = false;
 	u16 pressed = 0;
+	int img_count = 0;
 	while(1) {
 		do {
 			swiWaitForVBlank();
@@ -101,9 +113,11 @@ int main(int argc, char **argv) {
 
 			inner = !inner;
 		} else if(fatInited && pressed & (KEY_L | KEY_R)) {
-			FILE *file = fopen("photo.bmp", "wb");
+			std::string fname = "PD_DSi_"+std::to_string(img_count)+".bmp";
+			img_count += 1;
+			FILE *file = fopen(fname.c_str(), "wb");
 			if(file) {
-				printf("Saving BMP... ");
+				printf(" -Saving...");
 
 				// Wait for previous transfer to finish
 				while(REG_NDMA1CNT & BIT(31))
@@ -141,7 +155,8 @@ int main(int argc, char **argv) {
 
 				delete[] buffer;
 				fclose(file);
-				printf("Done!\n");
+				std::string print_str = "Saved "+fname+"\n";
+				printf(print_str.c_str());
 
 				// Set NDMA back to screen
 				REG_NDMA1DAD = (u32)bgGetGfxPtr(bg3Main); // NDMA1DAD, dest RAM/VRAM

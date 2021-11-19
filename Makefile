@@ -5,7 +5,7 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-export TARGET	:=	dsi-camera
+export TARGET	:=	PykaDex_DSi
 export TOPDIR	:=	$(CURDIR)
 
 # specify a directory which contains the nitro filesystem
@@ -13,10 +13,10 @@ export TOPDIR	:=	$(CURDIR)
 NITRO_FILES	:=
 
 # These set the information text in the nds file
-GAME_TITLE		:=	DSi camera test
-GAME_SUBTITLE1	:=	Pk11
+GAME_TITLE		:=	PykaDex_DSi
+GAME_SUBTITLE1	:=	github.com/PykaDex
 
-GAME_ICON		:=	icon.bmp
+GAME_ICON		:=	assets/icon.bmp
 
 include $(DEVKITARM)/ds_rules
 
