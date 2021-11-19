@@ -1,6 +1,8 @@
-# PykaDex DSi
+<img src="assets/icon.png" width="50" height="50">
 
-Concept Idea to turn Nintendo DSi into a functioning pokedex. base code for dsi camera forked from [dsi-camera](https://github.com/Epicpkmn11/dsi-camera)
+# PykaDex DSi
+A [PykaDex](https://github.com/PykaDex) repository being used as a concept Idea to use the Nintendo DSi as functioning pokedex
+Base code for dsi camera forked from [dsi-camera](https://github.com/Epicpkmn11/dsi-camera).
 
 # DSi camera test
 
