@@ -4,7 +4,8 @@
 A [PykaDex](https://github.com/PykaDex) repository being used as a concept Idea to use the Nintendo DSi as functioning pokedex
 Base code for dsi camera forked from [dsi-camera](https://github.com/Epicpkmn11/dsi-camera).
 
-# DSi camera test
+
+# DSi camera test (Forked README)
 
 This is an example app for using the DSi's Cameras. Currently it can show both cameras and save a picture as photo.bmp.
 
